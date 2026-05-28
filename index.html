@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decision OS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-grid"></div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
+    <div class="panel-header">
+      <div>
+        <h2>Settings</h2>
+        <p>Adjust how the decision engine behaves.</p>
+      </div>
+      <button class="icon-btn" id="closeSettings" aria-label="Close settings">✕</button>
+    </div>
+
+    <div class="panel-body">
+      <div class="setting-box">
+        <div class="setting-head">
+          <label for="thresholdSlider">Decision threshold</label>
+          <span id="thresholdValue">8</span>
+        </div>
+        <input id="thresholdSlider" type="range" min="-20" max="20" step="1" value="8" />
+        <p>Higher threshold means stricter decisions.</p>
+      </div>
+
+      <div class="setting-box row">
+        <div>
+          <label>Use hard gate</label>
+          <p>Reject low quality options before scoring.</p>
+        </div>
+        <label class="switch">
+          <input id="hardGateToggle" type="checkbox" checked />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-box row">
+        <div>
+          <label>Show decimal scores</label>
+          <p>Display precision instead of rounding.</p>
+        </div>
+        <label class="switch">
+          <input id="decimalToggle" type="checkbox" checked />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-box row">
+        <div>
+          <label>N means “do it now”</label>
+          <p>Let the noise gate act as a permissive signal.</p>
+        </div>
+        <label class="switch">
+          <input id="noiseNowToggle" type="checkbox" />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="preset-grid">
+        <button class="preset-btn" data-preset="small">Small decision</button>
+        <button class="preset-btn" data-preset="medium">Medium decision</button>
+        <button class="preset-btn" data-preset="major">Major decision</button>
+      </div>
+
+      <div class="setting-note">
+        Small decisions use rules. Big decisions use scoring. Life-changing decisions use delay plus regret check.
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-shell">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div>
+          <h1>Decision OS</h1>
+          <p>Real-time decision filtering, slots, and future points.</p>
+        </div>
+      </div>
+      <button class="icon-btn" id="openSettings" aria-label="Open settings">⚙</button>
+    </header>
+
+    <nav class="tabs glass">
+      <button class="tab-btn active" data-tab="decisionTab">Decision</button>
+      <button class="tab-btn" data-tab="slotsTab">Slots</button>
+      <button class="tab-btn" data-tab="pointsTab">Points</button>
+    </nav>
+
+    <main>
+      <section id="decisionTab" class="tab-panel active">
+        <div class="hero-line">
+          <div>
+            <h2>Decision Maker</h2>
+            <p>Use this for important choices that deserve a real filter.</p>
+          </div>
+          <div class="hero-chip">Formula + gate + threshold</div>
+        </div>
+
+        <div class="decision-grid">
+          <section class="glass card">
+            <div class="card-head">
+              <h3>Decision Maker</h3>
+              <p>Scoring for one major option.</p>
+            </div>
+            <div class="preset-strip">
+              <button class="mini-btn" data-fill="decisionSmall">Small</button>
+              <button class="mini-btn" data-fill="decisionMedium">Medium</button>
+              <button class="mini-btn" data-fill="decisionMajor">Major</button>
+              <button class="mini-btn" data-fill="decisionReset">Reset</button>
+            </div>
+            <div id="decisionControls" class="controls"></div>
+            <div class="action-row">
+              <button class="primary-btn" id="calculateDecisionBtn">Calculate</button>
+            </div>
+          </section>
+
+          <section class="glass card result-card">
+            <div class="card-head">
+              <h3>Decision Result</h3>
+              <p>Live recommendation</p>
+            </div>
+            <div class="result-box">
+              <div class="result-pill" id="decisionVerdict">Waiting</div>
+              <div class="result-number" id="decisionScore">—</div>
+              <div class="result-meta" id="decisionMeta">Set values and calculate.</div>
+              <div class="result-formula" id="decisionFormula"></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="glass card mt">
+          <div class="card-head">
+            <h3>Choice Maker</h3>
+            <p>Compare two large options side by side.</p>
+          </div>
+          <div class="split-grid">
+            <div>
+              <div class="subhead">Choice A</div>
+              <div id="choiceAControls" class="controls"></div>
+            </div>
+            <div>
+              <div class="subhead">Choice B</div>
+              <div id="choiceBControls" class="controls"></div>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="secondary-btn" id="compareChoicesBtn">Compare Choices</button>
+          </div>
+          <div class="choice-result" id="choiceResult">Compare choices to see the winner.</div>
+        </section>
+
+        <section class="glass card mt">
+          <div class="card-head">
+            <h3>Decision History</h3>
+            <p>Recent calculations are stored locally in the browser.</p>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </section>
+
+      <section id="slotsTab" class="tab-panel">
+        <div class="section-title">
+          <h2>Slots</h2>
+          <p>Create and manage slot groups like Practice, Work, or Study.</p>
+        </div>
+
+        <div class="slots-grid">
+          <section class="glass card">
+            <div class="card-head">
+              <h3>Create / Edit Slot Group</h3>
+              <p>A group can hold many named slots.</p>
+            </div>
+            <input id="slotGroupName" class="text-input" type="text" placeholder="Group name, e.g. Practice" />
+            <div id="slotInputs" class="slot-inputs"></div>
+            <div class="action-row wrap">
+              <button class="secondary-btn" id="addSlotInputBtn">Add Slot</button>
+              <button class="primary-btn" id="saveSlotGroupBtn">Save Group</button>
+              <button class="ghost-btn" id="clearSlotFormBtn">Clear</button>
+            </div>
+          </section>
+
+          <section class="glass card">
+            <div class="card-head">
+              <h3>Your Slot Groups</h3>
+              <p>Edit, duplicate, or delete any group.</p>
+            </div>
+            <div id="slotGroups" class="slot-groups"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="pointsTab" class="tab-panel">
+        <section class="glass card empty-card">
+          <h2>Points</h2>
+          <p>This tab is empty for now.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="decisionControlTemplate">
+    <div class="control">
+      <div class="control-head">
+        <label class="control-title"></label>
+        <span class="control-value"></span>
+      </div>
+      <input class="control-range" type="range" />
+      <div class="control-note"></div>
+      <div class="control-boolean hidden">
+        <span class="control-note"></span>
+        <label class="switch">
+          <input type="checkbox" class="control-toggle" />
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
