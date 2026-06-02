@@ -149,6 +149,15 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
+function updateSliderProgress(input) {
+  if (!input) return;
+  const min = parseFloat(input.min) || 0;
+  const max = parseFloat(input.max) || 100;
+  const val = parseFloat(input.value) || 0;
+  const pct = ((val - min) / (max - min)) * 100;
+  input.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, rgba(255, 255, 255, 0.1) ${pct}%, rgba(255, 255, 255, 0.1) 100%)`;
+}
+
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     settings: state.settings,
@@ -429,9 +438,11 @@ function createControls(container, sourceState) {
       sourceState[field.key] = Math.min(sourceState[field.key], max);
       range.value = sourceState[field.key];
       value.textContent = field.key === "Conf" ? Number(range.value).toFixed(2) : range.value;
+      updateSliderProgress(range);
       range.addEventListener("input", () => {
         sourceState[field.key] = parseFloat(range.value);
         value.textContent = field.key === "Conf" ? Number(range.value).toFixed(2) : range.value;
+        updateSliderProgress(range);
         saveState();
         refreshAll();
       });
@@ -446,7 +457,14 @@ function renderBiasControls() {
     "dopamineUrgency","dopamineNovelty","regretIgnore","regretPursue","opportunityValue","recoveryCost"
   ].forEach(id => {
     const node = document.getElementById(id);
-    if (node) node.addEventListener("input", () => { saveState(); refreshAll(); });
+    if (node) {
+      updateSliderProgress(node);
+      node.addEventListener("input", () => {
+        updateSliderProgress(node);
+        saveState();
+        refreshAll();
+      });
+    }
   });
   if (els.dopamineImpulse) els.dopamineImpulse.addEventListener("change", () => { saveState(); refreshAll(); });
 }
@@ -477,9 +495,11 @@ function renderMaxRanges() {
     `;
     const input = wrap.querySelector("input");
     const small = wrap.querySelector("small");
+    updateSliderProgress(input);
     input.addEventListener("input", () => {
       state.advanced.maxRanges[item.key] = parseInt(input.value, 10);
       small.textContent = input.value;
+      updateSliderProgress(input);
       saveState();
       refreshAll();
     });
@@ -500,6 +520,13 @@ function syncAdvancedUI() {
   els.regretPursue.value = state.advanced.regretPursue;
   els.opportunityValue.value = state.advanced.opportunityValue;
   els.recoveryCost.value = state.advanced.recoveryCost;
+
+  updateSliderProgress(els.dopamineUrgency);
+  updateSliderProgress(els.dopamineNovelty);
+  updateSliderProgress(els.regretIgnore);
+  updateSliderProgress(els.regretPursue);
+  updateSliderProgress(els.opportunityValue);
+  updateSliderProgress(els.recoveryCost);
 }
 
 function setAdvancedPreset(name) {
@@ -551,6 +578,7 @@ function wireSettings() {
   els.thresholdSlider.addEventListener("input", () => {
     state.settings.threshold = parseInt(els.thresholdSlider.value, 10);
     els.thresholdValue.textContent = state.settings.threshold;
+    updateSliderProgress(els.thresholdSlider);
     saveState();
     renderDecisionResult();
   });
@@ -728,88 +756,88 @@ function saveReviewFeedback() {
   closeReviewModal();
 }
 
-function wireSlots() {
-  const addSlotInput = (value = "") => {
-    const row = document.createElement("div");
-    row.className = "slot-input-row";
-    row.innerHTML = `
-      <input class="text-input slot-name-input" type="text" placeholder="Slot name" value="${escapeHTML(value)}" />
-      <button class="ghost-btn remove-slot-btn" type="button">Remove</button>
+function addSlotInput(value = "") {
+  const row = document.createElement("div");
+  row.className = "slot-input-row";
+  row.innerHTML = `
+    <input class="text-input slot-name-input" type="text" placeholder="Slot name" value="${escapeHTML(value)}" />
+    <button class="ghost-btn remove-slot-btn" type="button">Remove</button>
+  `;
+  row.querySelector(".remove-slot-btn").addEventListener("click", () => row.remove());
+  els.slotInputs.appendChild(row);
+}
+
+function renderSlotForm(values = ["", "", ""]) {
+  els.slotInputs.innerHTML = "";
+  values.forEach(v => addSlotInput(v));
+}
+
+function renderSlots() {
+  els.slotGroups.innerHTML = "";
+  if (!state.slots.length) {
+    els.slotGroups.innerHTML = `<div class="review-empty"><strong>No slot groups yet</strong><small>Create one to start organizing focus.</small></div>`;
+    return;
+  }
+
+  state.slots.forEach((group, index) => {
+    const card = document.createElement("div");
+    card.className = "slot-group";
+    card.innerHTML = `
+      <div class="slot-group-head">
+        <div>
+          <h4>${escapeHTML(group.name)}</h4>
+          <p>${group.slots.length} slot${group.slots.length === 1 ? "" : "s"}</p>
+        </div>
+        <div class="pill">Group ${index + 1}</div>
+      </div>
+      <div class="slot-tags">
+        ${group.slots.map(slot => `<span class="tag">${escapeHTML(slot)}</span>`).join("")}
+      </div>
+      <div class="slot-actions">
+        <button class="mini-btn" data-load="${index}">Load</button>
+        <button class="mini-btn" data-edit="${index}">Edit</button>
+        <button class="mini-btn delete-btn" data-delete="${index}">Delete</button>
+      </div>
     `;
-    row.querySelector(".remove-slot-btn").addEventListener("click", () => row.remove());
-    els.slotInputs.appendChild(row);
-  };
+    els.slotGroups.appendChild(card);
+  });
 
-  const renderSlotForm = (values = ["", "", ""]) => {
-    els.slotInputs.innerHTML = "";
-    values.forEach(v => addSlotInput(v));
-  };
-
-  const renderSlots = () => {
-    els.slotGroups.innerHTML = "";
-    if (!state.slots.length) {
-      els.slotGroups.innerHTML = `<div class="review-empty"><strong>No slot groups yet</strong><small>Create one to start organizing focus.</small></div>`;
-      return;
-    }
-
-    state.slots.forEach((group, index) => {
-      const card = document.createElement("div");
-      card.className = "slot-group";
-      card.innerHTML = `
-        <div class="slot-group-head">
-          <div>
-            <h4>${escapeHTML(group.name)}</h4>
-            <p>${group.slots.length} slot${group.slots.length === 1 ? "" : "s"}</p>
-          </div>
-          <div class="pill">Group ${index + 1}</div>
-        </div>
-        <div class="slot-tags">
-          ${group.slots.map(slot => `<span class="tag">${escapeHTML(slot)}</span>`).join("")}
-        </div>
-        <div class="slot-actions">
-          <button class="mini-btn" data-load="${index}">Load</button>
-          <button class="mini-btn" data-edit="${index}">Edit</button>
-          <button class="mini-btn delete-btn" data-delete="${index}">Delete</button>
-        </div>
-      `;
-      els.slotGroups.appendChild(card);
+  els.slotGroups.querySelectorAll("[data-load]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const group = state.slots[Number(btn.dataset.load)];
+      renderSlotForm(group.slots);
+      els.slotGroupName.value = group.name;
+      state.editingSlotIndex = null;
     });
+  });
 
-    els.slotGroups.querySelectorAll("[data-load]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const group = state.slots[Number(btn.dataset.load)];
-        renderSlotForm(group.slots);
-        els.slotGroupName.value = group.name;
+  els.slotGroups.querySelectorAll("[data-edit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.dataset.edit);
+      const group = state.slots[idx];
+      renderSlotForm(group.slots);
+      els.slotGroupName.value = group.name;
+      state.editingSlotIndex = idx;
+    });
+  });
+
+  els.slotGroups.querySelectorAll("[data-delete]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.dataset.delete);
+      if (!confirm("Delete this slot group?")) return;
+      state.slots.splice(idx, 1);
+      if (state.editingSlotIndex === idx) {
         state.editingSlotIndex = null;
-      });
+        els.slotGroupName.value = "";
+        renderSlotForm();
+      }
+      saveState();
+      renderSlots();
     });
+  });
+}
 
-    els.slotGroups.querySelectorAll("[data-edit]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = Number(btn.dataset.edit);
-        const group = state.slots[idx];
-        renderSlotForm(group.slots);
-        els.slotGroupName.value = group.name;
-        state.editingSlotIndex = idx;
-      });
-    });
-
-    els.slotGroups.querySelectorAll("[data-delete]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = Number(btn.dataset.delete);
-        if (!confirm("Delete this slot group?")) return;
-        state.slots.splice(idx, 1);
-        if (state.editingSlotIndex === idx) {
-          state.editingSlotIndex = null;
-          els.slotGroupName.value = "";
-          renderSlotForm();
-        }
-        saveState();
-        renderSlots();
-      });
-    });
-  };
-
+function wireSlots() {
   addSlotInput();
   addSlotInput();
   addSlotInput();
@@ -1005,6 +1033,11 @@ function init() {
   renderDecisionResult();
   renderChoiceResult();
   renderReviewList();
+
+  els.thresholdSlider.value = state.settings.threshold;
+  els.thresholdValue.textContent = state.settings.threshold;
+  updateSliderProgress(els.thresholdSlider);
+
   saveState();
 }
 
