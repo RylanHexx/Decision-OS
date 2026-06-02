@@ -7,35 +7,34 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-grid"></div>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="grid-overlay"></div>
 
   <div class="overlay" id="overlay"></div>
 
-  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
-    <div class="panel-header">
+  <aside class="settings-panel glass" id="settingsPanel" aria-hidden="true">
+    <div class="panel-head">
       <div>
-        <h2>Settings</h2>
-        <p>Adjust how the decision engine behaves.</p>
+        <h2>Quick Settings</h2>
+        <p>General app behavior.</p>
       </div>
       <button class="icon-btn" id="closeSettings" aria-label="Close settings">✕</button>
     </div>
-
     <div class="panel-body">
       <div class="setting-box">
-        <div class="setting-head">
+        <div class="setting-row">
           <label for="thresholdSlider">Decision threshold</label>
           <span id="thresholdValue">8</span>
         </div>
         <input id="thresholdSlider" type="range" min="-20" max="20" step="1" value="8" />
-        <p>Higher threshold means stricter decisions.</p>
+        <p>Higher threshold means stricter filtering.</p>
       </div>
 
-      <div class="setting-box row">
+      <div class="setting-box setting-row">
         <div>
           <label>Use hard gate</label>
-          <p>Reject low quality options before scoring.</p>
+          <p>Reject low-quality options before scoring.</p>
         </div>
         <label class="switch">
           <input id="hardGateToggle" type="checkbox" checked />
@@ -43,47 +42,26 @@
         </label>
       </div>
 
-      <div class="setting-box row">
+      <div class="setting-box setting-row">
         <div>
           <label>Show decimal scores</label>
-          <p>Display precision instead of rounding.</p>
+          <p>Display exact numbers instead of rounding.</p>
         </div>
         <label class="switch">
           <input id="decimalToggle" type="checkbox" checked />
           <span class="switch-slider"></span>
         </label>
       </div>
-
-      <div class="setting-box row">
-        <div>
-          <label>N means “do it now”</label>
-          <p>Let the noise gate act as a permissive signal.</p>
-        </div>
-        <label class="switch">
-          <input id="noiseNowToggle" type="checkbox" />
-          <span class="switch-slider"></span>
-        </label>
-      </div>
-
-      <div class="preset-grid">
-        <button class="preset-btn" data-preset="small">Small decision</button>
-        <button class="preset-btn" data-preset="medium">Medium decision</button>
-        <button class="preset-btn" data-preset="major">Major decision</button>
-      </div>
-
-      <div class="setting-note">
-        Small decisions use rules. Big decisions use scoring. Life-changing decisions use delay plus regret check.
-      </div>
     </div>
   </aside>
 
-  <div class="app-shell">
+  <div class="app">
     <header class="topbar glass">
       <div class="brand">
         <div class="brand-mark">D</div>
         <div>
           <h1>Decision OS</h1>
-          <p>Real-time decision filtering, slots, and future points.</p>
+          <p>Real-time filtering, comparison, review, and slot management.</p>
         </div>
       </div>
       <button class="icon-btn" id="openSettings" aria-label="Open settings">⚙</button>
@@ -91,57 +69,181 @@
 
     <nav class="tabs glass">
       <button class="tab-btn active" data-tab="decisionTab">Decision</button>
+      <button class="tab-btn" data-tab="choiceTab">Choice Maker</button>
+      <button class="tab-btn" data-tab="reviewTab">Review</button>
       <button class="tab-btn" data-tab="slotsTab">Slots</button>
       <button class="tab-btn" data-tab="pointsTab">Points</button>
     </nav>
 
     <main>
       <section id="decisionTab" class="tab-panel active">
-        <div class="hero-line">
+        <div class="section-hero">
           <div>
-            <h2>Decision Maker</h2>
-            <p>Use this for important choices that deserve a real filter.</p>
+            <h2>Decision Center</h2>
+            <p>Keep the main view focused. Expand advanced layers only when needed.</p>
           </div>
-          <div class="hero-chip">Formula + gate + threshold</div>
+          <div class="pill">Core Inputs · Advance Settings · Result</div>
         </div>
 
         <div class="decision-grid">
           <section class="glass card">
             <div class="card-head">
               <h3>Decision Maker</h3>
-              <p>Scoring for one major option.</p>
+              <p>Evaluate one major option with adaptive analysis.</p>
             </div>
+
+            <div class="field-box">
+              <label for="decisionTitle">Decision title</label>
+              <input id="decisionTitle" class="text-input" type="text" placeholder="What are you deciding?" />
+            </div>
+
             <div class="preset-strip">
-              <button class="mini-btn" data-fill="decisionSmall">Small</button>
-              <button class="mini-btn" data-fill="decisionMedium">Medium</button>
-              <button class="mini-btn" data-fill="decisionMajor">Major</button>
-              <button class="mini-btn" data-fill="decisionReset">Reset</button>
+              <button class="mini-btn" data-preset="small">Small</button>
+              <button class="mini-btn" data-preset="medium">Medium</button>
+              <button class="mini-btn" data-preset="major">Major</button>
+              <button class="mini-btn" data-preset="reset">Reset</button>
             </div>
+
             <div id="decisionControls" class="controls"></div>
-            <div class="action-row">
-              <button class="primary-btn" id="calculateDecisionBtn">Calculate</button>
+
+            <details class="advanced-dropdown">
+              <summary>Advance Settings</summary>
+              <div class="advanced-body">
+                <details class="feature-group" open>
+                  <summary>
+                    <label class="feature-head">
+                      <input type="checkbox" id="enableAdaptiveWeights" checked>
+                      <span>Adaptive Weight System</span>
+                      <span class="info-dot" data-tooltip="Adjust maximum values and weights by context.">i</span>
+                    </label>
+                  </summary>
+                  <div class="feature-body">
+                    <div class="setting-box">
+                      <label for="weightPreset">Auto adjuster preset</label>
+                      <select id="weightPreset" class="select-input">
+                        <option value="custom">Custom</option>
+                        <option value="career">Career decisions</option>
+                        <option value="learning">Learning decisions</option>
+                        <option value="recovery">Recovery mode</option>
+                        <option value="exploration">Exploration mode</option>
+                      </select>
+                      <p>Choose a preset to update weights and maximum values.</p>
+                    </div>
+                    <details class="mini-expand">
+                      <summary>Maximum values</summary>
+                      <div id="maxRangeList" class="range-list"></div>
+                    </details>
+                  </div>
+                </details>
+
+                <details class="feature-group">
+                  <summary>
+                    <label class="feature-head">
+                      <input type="checkbox" id="enableDecisionMode" checked>
+                      <span>Decision Mode</span>
+                      <span class="info-dot" data-tooltip="Switch behavior by context.">i</span>
+                    </label>
+                  </summary>
+                  <div class="feature-body">
+                    <div class="setting-box">
+                      <label for="decisionMode">Mode</label>
+                      <select id="decisionMode" class="select-input">
+                        <option value="builder">Builder</option>
+                        <option value="recovery">Recovery</option>
+                        <option value="exploration">Exploration</option>
+                        <option value="execution">Execution</option>
+                        <option value="learning">Learning</option>
+                      </select>
+                      <p>Modes shift thresholds, weights, and friction emphasis.</p>
+                    </div>
+                  </div>
+                </details>
+
+                <details class="feature-group">
+                  <summary>
+                    <label class="feature-head">
+                      <input type="checkbox" id="enableBiasFilters" checked>
+                      <span>Advanced Bias Filters</span>
+                      <span class="info-dot" data-tooltip="Check for impulse and regret risk.">i</span>
+                    </label>
+                  </summary>
+                  <div class="feature-body">
+                    <div class="setting-box">
+                      <label class="inline-label">Anti-dopamine detection</label>
+                      <p>Penalizes novelty-chasing and impulsive stimulation.</p>
+                      <div class="bias-grid">
+                        <div class="bias-item">
+                          <label for="dopamineUrgency">Urgency pressure</label>
+                          <input id="dopamineUrgency" type="range" min="0" max="5" step="0.1" value="2.4" />
+                        </div>
+                        <div class="bias-item">
+                          <label for="dopamineNovelty">Novelty pull</label>
+                          <input id="dopamineNovelty" type="range" min="0" max="5" step="0.1" value="2.8" />
+                        </div>
+                        <div class="bias-item">
+                          <label for="dopamineImpulse">Impulse state</label>
+                          <input id="dopamineImpulse" type="checkbox" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="setting-box">
+                      <label class="inline-label">Regret projection engine</label>
+                      <p>Compares regret from acting versus ignoring the option.</p>
+                      <div class="bias-grid">
+                        <div class="bias-item">
+                          <label for="regretIgnore">Regret if ignored</label>
+                          <input id="regretIgnore" type="range" min="0" max="10" step="0.1" value="5" />
+                        </div>
+                        <div class="bias-item">
+                          <label for="regretPursue">Regret if pursued</label>
+                          <input id="regretPursue" type="range" min="0" max="10" step="0.1" value="3" />
+                        </div>
+                        <div class="bias-item">
+                          <label for="opportunityValue">Opportunity value</label>
+                          <input id="opportunityValue" type="range" min="0" max="10" step="0.1" value="5" />
+                        </div>
+                        <div class="bias-item">
+                          <label for="recoveryCost">Recovery cost</label>
+                          <input id="recoveryCost" type="range" min="0" max="10" step="0.1" value="2" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </details>
+
+            <div class="actions">
+              <button class="primary-btn" id="calculateBtn">Analyze Decision</button>
             </div>
           </section>
 
           <section class="glass card result-card">
             <div class="card-head">
-              <h3>Decision Result</h3>
-              <p>Live recommendation</p>
+              <h3>Result</h3>
+              <p>Live score and recommendation.</p>
             </div>
-            <div class="result-box">
-              <div class="result-pill" id="decisionVerdict">Waiting</div>
-              <div class="result-number" id="decisionScore">—</div>
-              <div class="result-meta" id="decisionMeta">Set values and calculate.</div>
-              <div class="result-formula" id="decisionFormula"></div>
-            </div>
+            <div class="result-box" id="resultBox">Awaiting analysis...</div>
           </section>
         </div>
+      </section>
 
-        <section class="glass card mt">
-          <div class="card-head">
-            <h3>Choice Maker</h3>
-            <p>Compare two large options side by side.</p>
+      <section id="choiceTab" class="tab-panel">
+        <div class="section-hero">
+          <div>
+            <h2>Choice Maker</h2>
+            <p>Compare two strong options side by side.</p>
           </div>
+          <div class="pill">Choice A · Choice B · Winner</div>
+        </div>
+
+        <section class="glass card">
+          <div class="card-head">
+            <h3>Choice Comparison</h3>
+            <p>Adjust two options and compare them.</p>
+          </div>
+
           <div class="split-grid">
             <div>
               <div class="subhead">Choice A</div>
@@ -152,36 +254,53 @@
               <div id="choiceBControls" class="controls"></div>
             </div>
           </div>
-          <div class="action-row">
+
+          <div class="actions">
             <button class="secondary-btn" id="compareChoicesBtn">Compare Choices</button>
           </div>
+
           <div class="choice-result" id="choiceResult">Compare choices to see the winner.</div>
         </section>
+      </section>
 
-        <section class="glass card mt">
-          <div class="card-head">
-            <h3>Decision History</h3>
-            <p>Recent calculations are stored locally in the browser.</p>
+      <section id="reviewTab" class="tab-panel">
+        <div class="section-hero">
+          <div>
+            <h2>Review</h2>
+            <p>Saved decisions and choices live here. Open one to add feedback after a few days.</p>
           </div>
-          <div id="historyList" class="history-list"></div>
+          <div class="pill">Feedback · Notes · Collisions</div>
+        </div>
+
+        <section class="glass card">
+          <div class="card-head">
+            <h3>Saved Decisions</h3>
+            <p>Click any item to review its outcome and side effects.</p>
+          </div>
+          <div class="review-list" id="reviewList"></div>
         </section>
       </section>
 
       <section id="slotsTab" class="tab-panel">
-        <div class="section-title">
-          <h2>Slots</h2>
-          <p>Create and manage slot groups like Practice, Work, or Study.</p>
+        <div class="section-hero">
+          <div>
+            <h2>Slots</h2>
+            <p>Create and maintain slot groups without clutter.</p>
+          </div>
+          <div class="pill">Practice · Work · Study</div>
         </div>
 
         <div class="slots-grid">
           <section class="glass card">
             <div class="card-head">
               <h3>Create / Edit Slot Group</h3>
-              <p>A group can hold many named slots.</p>
+              <p>One group can hold many named slots.</p>
             </div>
-            <input id="slotGroupName" class="text-input" type="text" placeholder="Group name, e.g. Practice" />
+
+            <input id="slotGroupName" class="text-input" type="text" placeholder="Group name, e.g. Practice">
             <div id="slotInputs" class="slot-inputs"></div>
-            <div class="action-row wrap">
+
+            <div class="actions wrap">
               <button class="secondary-btn" id="addSlotInputBtn">Add Slot</button>
               <button class="primary-btn" id="saveSlotGroupBtn">Save Group</button>
               <button class="ghost-btn" id="clearSlotFormBtn">Clear</button>
@@ -191,7 +310,7 @@
           <section class="glass card">
             <div class="card-head">
               <h3>Your Slot Groups</h3>
-              <p>Edit, duplicate, or delete any group.</p>
+              <p>Edit, load, or delete groups.</p>
             </div>
             <div id="slotGroups" class="slot-groups"></div>
           </section>
@@ -201,27 +320,94 @@
       <section id="pointsTab" class="tab-panel">
         <section class="glass card empty-card">
           <h2>Points</h2>
-          <p>This tab is empty for now.</p>
+          <p>This tab is intentionally empty for now.</p>
         </section>
       </section>
     </main>
   </div>
 
-  <template id="decisionControlTemplate">
+  <div class="modal-overlay" id="reviewModalOverlay" hidden></div>
+  <div class="review-modal glass" id="reviewModal" hidden aria-modal="true" role="dialog">
+    <div class="panel-head">
+      <div>
+        <h2>Review Decision</h2>
+        <p>Update the title and give feedback.</p>
+      </div>
+      <button class="icon-btn" id="closeReviewModal" aria-label="Close review">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="setting-box">
+        <label for="reviewTitle">Title</label>
+        <input id="reviewTitle" class="text-input" type="text" />
+      </div>
+
+      <div class="setting-box">
+        <label for="reviewOutcome">Outcome</label>
+        <select id="reviewOutcome" class="select-input">
+          <option value="">Select outcome</option>
+          <option value="better">Better than expected</option>
+          <option value="same">As expected</option>
+          <option value="worse">Worse than expected</option>
+        </select>
+      </div>
+
+      <div class="setting-box">
+        <label for="reviewSideEffects">Side effects</label>
+        <textarea id="reviewSideEffects" class="text-input textarea" rows="3" placeholder="Did it create side effects?"></textarea>
+      </div>
+
+      <div class="setting-box">
+        <label for="reviewCollisions">Habits / timetable collisions</label>
+        <textarea id="reviewCollisions" class="text-input textarea" rows="3" placeholder="Did it collide with other habits or your timetable?"></textarea>
+      </div>
+
+      <div class="setting-box">
+        <label for="reviewNotes">Short notes</label>
+        <textarea id="reviewNotes" class="text-input textarea" rows="3" placeholder="Quick lesson or takeaway."></textarea>
+      </div>
+
+      <div class="setting-box">
+        <label for="reviewRepeat">Would you repeat this?</label>
+        <select id="reviewRepeat" class="select-input">
+          <option value="">Select</option>
+          <option value="yes">Yes</option>
+          <option value="maybe">Maybe</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button class="primary-btn" id="saveReviewBtn">Save Feedback</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="controlTemplate">
     <div class="control">
       <div class="control-head">
         <label class="control-title"></label>
         <span class="control-value"></span>
       </div>
-      <input class="control-range" type="range" />
+      <input class="control-range" type="range">
       <div class="control-note"></div>
       <div class="control-boolean hidden">
         <span class="control-note"></span>
         <label class="switch">
-          <input type="checkbox" class="control-toggle" />
+          <input type="checkbox" class="control-toggle">
           <span class="switch-slider"></span>
         </label>
       </div>
+    </div>
+  </template>
+
+  <template id="biasTemplate">
+    <div class="control">
+      <div class="control-head">
+        <label class="control-title"></label>
+        <span class="control-value"></span>
+      </div>
+      <input class="control-range" type="range">
+      <div class="control-note"></div>
     </div>
   </template>
 
