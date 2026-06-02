@@ -271,46 +271,6 @@ body {
 .control-range {
   width: 100%;
   accent-color: var(--accent);
-  -webkit-appearance: slider-horizontal;
-  appearance: slider-horizontal;
-}
-.control-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
-}
-.control-range::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-}
-.control-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
-}
-.control-range::-moz-range-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-}
-.control-range::-moz-range-progress {
-  background: var(--accent);
-  border-radius: 3px;
 }
 .control-note { margin-top: 8px; font-size: 0.9rem; line-height: 1.45; }
 .control-boolean {
@@ -488,50 +448,7 @@ body {
   align-items: center;
 }
 .range-item small { color: var(--muted); }
-.range-item input {
-  width: 100%;
-  accent-color: var(--accent);
-  -webkit-appearance: slider-horizontal;
-  appearance: slider-horizontal;
-}
-.range-item input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
-}
-.range-item input::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-}
-.range-item input::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  cursor: pointer;
-  background: var(--accent);
-  border: none;
-  box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
-}
-.range-item input::-moz-range-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-}
-.range-item input::-moz-range-progress {
-  background: var(--accent);
-  border-radius: 3px;
-}
+.range-item input { width: 100%; accent-color: var(--accent); }
 .range-item .meta { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
 
 .bias-grid {
