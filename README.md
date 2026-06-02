@@ -1,0 +1,3 @@
+## Decision OS
+### Experiment for making long decision with sliders and mathimatical formula
+### Just for testing and feedback...
